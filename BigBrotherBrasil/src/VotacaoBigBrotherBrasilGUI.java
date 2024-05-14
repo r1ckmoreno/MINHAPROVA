@@ -51,7 +51,7 @@ public class VotacaoBigBrotherBrasilGUI {
             public void actionPerformed(ActionEvent e) {
                 String voto;
                 do {
-                    voto = JOptionPane.showInputDialog(null, "Em quem você vota para sair da casa? ");
+                    voto = JOptionPane.showInputDialog(null, "Em quem você vota para sair da casa? (digite sair para voltar ao menu principal)");
                     if (voto != null && !voto.equalsIgnoreCase("sair")) {
                         boolean encontrado = false;
                         for (Jogador jogador : jogadores) {
@@ -75,18 +75,57 @@ public class VotacaoBigBrotherBrasilGUI {
         resultButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Jogador eliminado = jogadores.get(0);
+                ArrayList<Jogador> eliminados = new ArrayList<>();
+                int maiorNumeroVotos = -1;
+
                 for (Jogador jogador : jogadores) {
-                    if (jogador.getVotos() > eliminado.getVotos()) {
-                        eliminado = jogador;
+                    int votos = jogador.getVotos();
+                    if (votos > maiorNumeroVotos) {
+                        eliminados.clear();
+                        eliminados.add(jogador);
+                        maiorNumeroVotos = votos;
+                    } else if (votos == maiorNumeroVotos) {
+                        eliminados.add(jogador);
                     }
                 }
 
-                JOptionPane.showMessageDialog(null, "Se eu conseguir mover montanhas, se eu conseguir surfar um tsunami,\n" +
-                        "se eu conseguir domar o sol, se eu conseguir fazer o mar virar sertão,\n" +
-                        "e o sertão virar mar, se eu conseguir dizer o que eu nunca vou conseguir dizer,\n" +
-                        "aí terá chegado o dia em que eu vou conseguir te eliminar com alegria.\n" +
-                        "Com " + eliminado.getVotos() + " votos, é você quem sai " + eliminado.getNome());
+                if (eliminados.size() == 1) {
+                    Jogador eliminado = eliminados.get(0);
+                    JOptionPane.showMessageDialog(null, "Se eu conseguir mover montanhas, se eu conseguir surfar um tsunami,\n" +
+                            "se eu conseguir domar o sol, se eu conseguir fazer o mar virar sertão,\n" +
+                            "e o sertão virar mar, se eu conseguir dizer o que eu nunca vou conseguir dizer,\n" +
+                            "aí terá chegado o dia em que eu vou conseguir te eliminar com alegria.\n" +
+                            "Com " + eliminado.getVotos() + " votos, é você quem sai " + eliminado.getNome());
+                } else {
+                    JFrame empateFrame = new JFrame("Empate - Novo Voto");
+                    empateFrame.setSize(700, 300);
+                    empateFrame.setLayout(new BorderLayout());
+                    empateFrame.setLocationRelativeTo(null);
+
+                    JPanel empateButtonPanel = new JPanel();
+                    empateButtonPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
+                    empateButtonPanel.setBorder(BorderFactory.createEmptyBorder(30, 0, 30, 0));
+
+                    JLabel empateLabel = new JLabel("Empate entre os jogadores com " + maiorNumeroVotos + " votos. Realize uma nova votação para desempate.");
+
+                    empateButtonPanel.add(empateLabel);
+
+                    for (Jogador jogador : eliminados) {
+                        JButton empateVoteButton = new JButton("Votar em " + jogador.getNome());
+                        empateVoteButton.addActionListener(new ActionListener() {
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                jogador.incrementaUmVoto();
+                                JOptionPane.showMessageDialog(null, "Voto computado com sucesso!");
+                                empateFrame.dispose();
+                            }
+                        });
+                        empateButtonPanel.add(empateVoteButton);
+                    }
+
+                    empateFrame.add(empateButtonPanel, BorderLayout.CENTER);
+                    empateFrame.setVisible(true);
+                }
             }
         });
 
